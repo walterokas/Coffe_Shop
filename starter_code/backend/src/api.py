@@ -52,9 +52,12 @@ def getDrinks():
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks-detail', methods=['GET'])
+@requires_auth(permission='get:drinks-detail')
 def getDrinkDetail():
     drinks_obj = Drink.query.all()
     drinks = [drink.short() for drink in drinks_obj]
+    print("DRINKS-DETAIL: ", drinks)
+
     return jsonify({"success": True, "drinks": drinks, "status_code": 200})
 
 '''
@@ -67,6 +70,7 @@ def getDrinkDetail():
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks', methods=['POST'])
+@requires_auth(permission='post:drinks')
 def createDrink():
     try:
         req = json.loads(request.data)
@@ -92,7 +96,10 @@ def createDrink():
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks/<id>', methods=['PATCH'])
+@requires_auth(permission='patch:drinks')
 def updateDrink(id):
+    # if payload['permission'] != 'patch:drinks':
+    #     abort(401)
     if id is None:
         abort(404)
     drink_obj = Drink.query.filter(Drink.id == id).one_or_none()
@@ -123,6 +130,7 @@ def updateDrink(id):
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks/<id>', methods=['DELETE'])
+@requires_auth(permission='delete:drinks')
 def deleteDrink(id):
     if id is None:
         abort(404)
@@ -163,12 +171,25 @@ def unprocessable(error):
 @TODO implement error handler for 404
     error handler should conform to general task above
 '''
-
+@app.errorhandler(404)
+def unprocessable(error):
+    return jsonify({
+        "success": False,
+        "error": 404,
+        "message": "Resource Not Found"
+    }), 404
 
 '''
 @TODO implement error handler for AuthError
     error handler should conform to general task above
 '''
+@app.errorhandler(401)
+def unprocessable(error):
+    return jsonify({
+        "success": False,
+        "error": 401,
+        "message": "Authentication Error"
+    }), 401
 
 
 #----------------------------------------------------------------------------#
