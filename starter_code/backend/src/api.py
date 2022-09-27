@@ -53,7 +53,7 @@ def getDrinks():
 '''
 @app.route('/drinks-detail', methods=['GET'])
 @requires_auth(permission='get:drinks-detail')
-def getDrinkDetail():
+def getDrinkDetail(payload):
     drinks_obj = Drink.query.all()
     drinks = [drink.short() for drink in drinks_obj]
     print("DRINKS-DETAIL: ", drinks)
@@ -71,7 +71,7 @@ def getDrinkDetail():
 '''
 @app.route('/drinks', methods=['POST'])
 @requires_auth(permission='post:drinks')
-def createDrink():
+def createDrink(payload):
     try:
         req = json.loads(request.data)
         print("NEW DRINK DATA: ", req)
@@ -97,12 +97,13 @@ def createDrink():
 '''
 @app.route('/drinks/<id>', methods=['PATCH'])
 @requires_auth(permission='patch:drinks')
-def updateDrink(id):
+def updateDrink(payload, id):
     # if payload['permission'] != 'patch:drinks':
     #     abort(401)
     if id is None:
         abort(404)
-    drink_obj = Drink.query.filter(Drink.id == id).one_or_none()
+    # drink_obj = Drink.query.filter(Drink.id == id).one_or_none()
+    drink_obj = Drink.query.filter(Drink.id == id).first()
     if drink_obj is None:
         abort(404)
 
@@ -131,7 +132,7 @@ def updateDrink(id):
 '''
 @app.route('/drinks/<id>', methods=['DELETE'])
 @requires_auth(permission='delete:drinks')
-def deleteDrink(id):
+def deleteDrink(payload, id):
     if id is None:
         abort(404)
     drink_obj = Drink.query.filter(Drink.id == id).first()
