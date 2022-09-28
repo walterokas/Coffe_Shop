@@ -173,7 +173,7 @@ def unprocessable(error):
     error handler should conform to general task above
 '''
 @app.errorhandler(404)
-def unprocessable(error):
+def notFound(error):
     return jsonify({
         "success": False,
         "error": 404,
@@ -185,12 +185,20 @@ def unprocessable(error):
     error handler should conform to general task above
 '''
 @app.errorhandler(401)
-def unprocessable(error):
+def authenticationFailure(error):
     return jsonify({
         "success": False,
         "error": 401,
         "message": "Authentication Error"
     }), 401
+
+@app.errorhandler(403)
+def unauthorized(error):
+    return jsonify({
+        "success": False,
+        "error": 403,
+        "message": "Unauthorized"
+    }), 403
 
 
 #----------------------------------------------------------------------------#
