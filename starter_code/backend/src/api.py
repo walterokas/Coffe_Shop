@@ -55,7 +55,7 @@ def getDrinks():
 @requires_auth(permission='get:drinks-detail')
 def getDrinkDetail(payload):
     drinks_obj = Drink.query.all()
-    drinks = [drink.short() for drink in drinks_obj]
+    drinks = [drink.long() for drink in drinks_obj]
     print("DRINKS-DETAIL: ", drinks)
 
     return jsonify({"success": True, "drinks": drinks, "status_code": 200})
@@ -80,9 +80,9 @@ def createDrink(payload):
 
     if req.get('title', None) is None and req.get('recipe', None) is None:
         abort(404)
-    drink_obj = Drink(title=str(req.get('title', None)), recipe=str(req.get('recipe', None)))
+    drink_obj = Drink(title=str(req.get('title', None)), recipe=json.dumps(req.get('recipe', None)))
     drink_obj.insert()
-    return jsonify({"success": True, "drinks": req.get('title'), "status_code": 200})
+    return jsonify({"success": True, "drinks": [drink_obj.long()], "status_code": 200})
 
 '''
 @TODO implement endpoint
@@ -118,7 +118,7 @@ def updateDrink(payload, id):
         drink_obj.recipe = req.get('recipe', None)
     drink_obj.update()
 
-    return jsonify({"success": True, "update": id, "status_code": 200})
+    return jsonify({"success": True, "drinks": [drink_obj.long()], "status_code": 200})
 
 '''
 @TODO implement endpoint
@@ -200,19 +200,12 @@ def unauthorized(error):
         "message": "Unauthorized"
     }), 403
 
+@app.errorhandler(AuthError)
+def handle_auth_error(error):
+    response = jsonify(error.error)
+    response.status_code = error.status_code
+    return response
 
 #----------------------------------------------------------------------------#
 # Launch.
 #----------------------------------------------------------------------------#
-
-'''
-# Default port:
-if __name__ == '__main__':
-    app.run()
-
-# Or specify port manually:
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8000))
-    app.run(host='0.0.0.0', port=port)
-'''
